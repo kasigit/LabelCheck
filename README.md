@@ -53,6 +53,15 @@ The repo is Railway-ready: Railway detects the `Dockerfile`, builds the image, a
    public URL works out of the box. Generate a domain under the service's **Settings →
    Networking** and share that URL for others to test.
 
+**Performance on small instances.** OCR is CPU-bound. The app auto-sizes the OCR thread
+pool to the container's actual CPU quota (read from its cgroup), which avoids the common
+slowdown where ONNX Runtime spawns one thread per *host* core and they thrash on a fraction
+of a vCPU. On Railway's **free/trial** tier (very limited CPU) a check may still take a few
+seconds; for snappy results give the service more CPU (Hobby plan). Extra tunables, via
+environment variables:
+- `LABELCHECK_OCR_THREADS` — pin the OCR thread count (default `0` = auto from cgroup).
+- `LABELCHECK_MAX_IMAGE_EDGE_PX` — lower it (e.g. `1600`) to trade a little accuracy for speed.
+
 ---
 
 ## Run it locally for development

@@ -23,6 +23,13 @@ class Settings(BaseSettings):
     # accurate past a point; 2000 matches the client-side downscale.
     max_image_edge_px: int = 2000
 
+    # OCR thread pool size. 0 = auto: size it to the container's CPU quota (not the host's
+    # core count). This matters a lot in constrained containers (e.g. a small Railway
+    # instance): ONNX Runtime otherwise spawns one thread per *host* core and they thrash
+    # on the fraction of a vCPU the instance actually gets, making OCR several times slower.
+    # Set LABELCHECK_OCR_THREADS to a positive number to pin it explicitly.
+    ocr_threads: int = 0
+
     # --- Batch limits (reject clearly above these) ------------------------------------
     batch_max_images: int = 500
     batch_max_zip_bytes: int = 500 * 1024 * 1024  # 500 MB
