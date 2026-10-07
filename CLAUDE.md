@@ -95,5 +95,5 @@ Load the relevant skill before working in that area:
 - Run the relevant tests and linter before saying a change is done.
 - When changing an API response shape, update the Pydantic model, run `npm run gen:api`, and fix the frontend types.
 - Keep business logic out of route handlers and React components.
-- Record any assumption you make about TTB rules in `docs/assumptions.md` (it feeds the README).
+- Record any assumption you make about TTB rules in `docs/ASSUMPTIONS.md` (it feeds the README).
 - Don't add dependencies that download models or call external services at runtime.

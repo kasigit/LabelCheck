@@ -238,4 +238,4 @@ cleanly if the engine or sample set is absent, and run in CI where both are pres
 ## 10. Assumptions
 
 The open decisions (data source, exact warning wording, the bold heuristic, beverage-type
-rules, matching tolerances) are documented in [assumptions.md](assumptions.md).
+rules, matching tolerances) are documented in [ASSUMPTIONS.md](ASSUMPTIONS.md).

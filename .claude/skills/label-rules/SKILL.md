@@ -6,7 +6,7 @@ description: TTB label verification domain rules for LabelCheck — required fie
 # Label verification rules
 
 These are the domain core of the app. When a rule here is ambiguous, choose the outcome that sends the
-label to **REVIEW** rather than a confident wrong answer, and note the assumption in `docs/assumptions.md`.
+label to **REVIEW** rather than a confident wrong answer, and note the assumption in `docs/ASSUMPTIONS.md`.
 
 ## Fields and when they're required
 

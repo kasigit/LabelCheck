@@ -13,10 +13,10 @@ The tool **flags**; the agent makes the final call. Uncertain results are marked
 > This is a standalone proof-of-concept. It does not integrate with COLA, stores nothing,
 > and makes **no outbound network calls at runtime** — it runs entirely behind a firewall.
 
-See [docs/DOCUMENTATION.md](docs/DOCUMENTATION.md) for the full write-up (what it does, the
+See [docs/RELEASE_NOTES.md](docs/RELEASE_NOTES.md) for the full write-up (what it does, the
 architecture diagram, the tech-stack rationale, constraints),
 [docs/HOW_TO_VERIFY.md](docs/HOW_TO_VERIFY.md) for a step-by-step test guide, and
-[docs/assumptions.md](docs/assumptions.md) for the assumptions made.
+[docs/ASSUMPTIONS.md](docs/ASSUMPTIONS.md) for the assumptions made.
 
 ---
 

@@ -10,7 +10,7 @@ the original image and the OCR boxes, so it is split out and only runs in the fu
 pipeline; `check_warning_text` covers the text-only parts.
 
 Reference text — verify against ttb.gov before release and keep it here as the single
-source of truth. (Recorded as an assumption in docs/assumptions.md.)
+source of truth. (Recorded as an assumption in docs/ASSUMPTIONS.md.)
 """
 
 from __future__ import annotations
