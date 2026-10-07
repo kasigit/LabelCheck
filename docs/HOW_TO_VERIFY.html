@@ -1,0 +1,528 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How to Verify — LabelCheck</title>
+<style>
+:root {
+  --bg: #ffffff; --fg: #1f2328; --muted: #656d76; --border: #d0d7de;
+  --accent: #0969da; --code-bg: #f6f8fa; --table-head: #f6f8fa;
+  --match: #15803d; --review: #b45309; --mismatch: #b91c1c;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0d1117; --fg: #e6edf3; --muted: #9198a1; --border: #30363d;
+    --accent: #4493f8; --code-bg: #161b22; --table-head: #161b22;
+    --match: #3fb950; --review: #d29922; --mismatch: #f85149;
+  }
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; background: var(--bg); color: var(--fg);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-size: 17px; line-height: 1.7;
+}
+.layout { display: flex; gap: 0; max-width: 1100px; margin: 0 auto; }
+nav.side {
+  flex: 0 0 240px; padding: 28px 16px; border-right: 1px solid var(--border);
+  position: sticky; top: 0; align-self: flex-start; height: 100vh; overflow-y: auto;
+}
+nav.side .brand { font-size: 20px; font-weight: 800; margin: 0 0 4px; }
+nav.side .tagline { font-size: 13px; color: var(--muted); margin: 0 0 18px; }
+nav.side a {
+  display: block; padding: 8px 12px; border-radius: 6px; color: var(--fg);
+  text-decoration: none; font-size: 15px; margin-bottom: 2px;
+}
+nav.side a:hover { background: var(--code-bg); }
+nav.side a.active { background: var(--accent); color: #fff; font-weight: 600; }
+main { flex: 1 1 auto; padding: 32px 40px 80px; min-width: 0; }
+.content { max-width: 820px; }
+h1 { font-size: 2em; border-bottom: 2px solid var(--border); padding-bottom: .3em; margin-top: 0; }
+h2 { font-size: 1.5em; border-bottom: 1px solid var(--border); padding-bottom: .3em; margin-top: 2em; }
+h3 { font-size: 1.2em; margin-top: 1.8em; }
+a { color: var(--accent); }
+p, li { font-size: 1rem; }
+blockquote {
+  margin: 1em 0; padding: .6em 1em; border-left: 4px solid var(--accent);
+  background: var(--code-bg); border-radius: 0 6px 6px 0; color: var(--fg);
+}
+blockquote p { margin: .3em 0; }
+code {
+  background: var(--code-bg); padding: .15em .4em; border-radius: 5px;
+  font-family: "SF Mono", ui-monospace, "Cascadia Code", Menlo, Consolas, monospace; font-size: .88em;
+}
+pre {
+  background: var(--code-bg); border: 1px solid var(--border); border-radius: 8px;
+  padding: 14px 16px; overflow-x: auto; line-height: 1.5;
+}
+pre code { background: none; padding: 0; font-size: .85em; }
+table { border-collapse: collapse; width: 100%; margin: 1.2em 0; font-size: .95rem; }
+th, td { border: 1px solid var(--border); padding: 8px 12px; text-align: left; vertical-align: top; }
+th { background: var(--table-head); font-weight: 600; }
+tr:nth-child(even) td { background: color-mix(in srgb, var(--code-bg) 55%, transparent); }
+hr { border: none; border-top: 1px solid var(--border); margin: 2.5em 0; }
+.badge { display: inline-block; padding: .05em .5em; border-radius: 999px; font-weight: 700; font-size: .95em; }
+.mermaid { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 16px; text-align: center; }
+.footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid var(--border); color: var(--muted); font-size: .9em; }
+@media (max-width: 800px) {
+  .layout { flex-direction: column; }
+  nav.side { position: static; height: auto; width: 100%; border-right: none; border-bottom: 1px solid var(--border); flex-basis: auto; }
+  main { padding: 20px 16px 60px; }
+}
+</style>
+</head>
+<body>
+<div class="layout">
+<nav class="side"><p class="brand">LabelCheck</p><p class="tagline">Alcohol-label verification</p><a href="README.html">Overview</a><a href="DOCUMENTATION.html">Full Documentation</a><a href="HOW_TO_VERIFY.html" class="active">How to Verify</a><a href="assumptions.html">Assumptions</a></nav>
+<main><div class="content">
+<h1 id="how-to-verify-labelcheck">How to Verify LabelCheck</h1>
+<p>A step-by-step guide to confirming the app works, using the sample data in <code>samples/</code>. No<br>
+coding needed — everything is done in the browser.</p>
+<p><strong>Before you start</strong><br>
+1. Start the app (either one):<br>
+   - Docker: <code>docker build -t labelcheck . &amp;&amp; docker run -p 8000:8000 labelcheck</code>, then open <strong>http://localhost:8000</strong><br>
+   - Or dev mode (backend + <code>npm run dev</code>), then open <strong>http://localhost:5173</strong><br>
+2. The sample files are in the <code>samples/</code> folder:<br>
+   - <code>samples/labels/*.png</code> — the label images<br>
+   - <code>samples/applications.csv</code> — the application data for every label<br>
+   - <code>samples/images.zip</code> — all the images zipped (for the batch test)</p>
+<p><strong>How to read a result:</strong> every field shows a status — ✓ <strong>Match</strong> (green), ⚠ <strong>Needs<br>
+review</strong> (amber), ✗ <strong>Mismatch</strong> (red), ? <strong>Not found</strong> (grey). The <strong>Overall</strong> is the<br>
+worst status across all fields. The tool flags; the agent decides.</p>
+<hr>
+<h2 id="part-1-single-image">Part 1 — Single image</h2>
+<p>Go to the <strong>Check one label</strong> tab. For each test below: choose the image from<br>
+<code>samples/labels/</code>, type the values exactly as shown, then click <strong>Check label</strong>.</p>
+<blockquote>
+<p>Leave a field blank where the table says <em>(leave blank)</em>.</p>
+</blockquote>
+<h3 id="test-1-everything-correct-expect-match">Test 1 — Everything correct (expect: <span class="badge" style="color:var(--match)">✓ Match</span>)</h3>
+<p>Image: <strong><code>clean.png</code></strong></p>
+<table>
+<thead>
+<tr>
+<th>Field on screen</th>
+<th>Value to type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Beverage type</td>
+<td>Spirits</td>
+</tr>
+<tr>
+<td>Brand name</td>
+<td><code>Old Tom Distillery</code></td>
+</tr>
+<tr>
+<td>Class / type</td>
+<td><code>Kentucky Straight Bourbon Whiskey</code></td>
+</tr>
+<tr>
+<td>Alcohol content</td>
+<td><code>45% Alc./Vol.</code></td>
+</tr>
+<tr>
+<td>Net contents</td>
+<td><code>750 mL</code></td>
+</tr>
+<tr>
+<td>Bottler / producer name &amp; address</td>
+<td><code>Old Tom Distillery, Louisville, KY</code></td>
+</tr>
+<tr>
+<td>Country of origin</td>
+<td><em>(leave blank)</em></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Expected:</strong> Overall <strong>Match</strong>. Every field green, including all three Government-Warning<br>
+sub-checks (wording / capitals / bold).</p>
+<hr>
+<h3 id="test-2-wrong-alcohol-content-expect-mismatch">Test 2 — Wrong alcohol content (expect: <span class="badge" style="color:var(--mismatch)">✗ Mismatch</span>)</h3>
+<p>Image: <strong><code>wrong_abv.png</code></strong> (the label prints 40%, the application says 45%)</p>
+<table>
+<thead>
+<tr>
+<th>Field on screen</th>
+<th>Value to type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Beverage type</td>
+<td>Spirits</td>
+</tr>
+<tr>
+<td>Brand name</td>
+<td><code>Old Tom Distillery</code></td>
+</tr>
+<tr>
+<td>Class / type</td>
+<td><code>Kentucky Straight Bourbon Whiskey</code></td>
+</tr>
+<tr>
+<td>Alcohol content</td>
+<td><code>45% Alc./Vol.</code></td>
+</tr>
+<tr>
+<td>Net contents</td>
+<td><code>750 mL</code></td>
+</tr>
+<tr>
+<td>Bottler / producer name &amp; address</td>
+<td><code>Old Tom Distillery, Louisville, KY</code></td>
+</tr>
+<tr>
+<td>Country of origin</td>
+<td><em>(leave blank)</em></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Expected:</strong> Overall <strong>Mismatch</strong>. <strong>Alcohol content</strong> is red with a reason like<br>
+"Label says 40%, application says 45%." Everything else matches.</p>
+<hr>
+<h3 id="test-3-different-units-still-correct-expect-match">Test 3 — Different units, still correct (expect: <span class="badge" style="color:var(--match)">✓ Match</span>)</h3>
+<p>Image: <strong><code>units.png</code></strong> (the label prints <strong>75 cl</strong>, the application says <strong>750 mL</strong>)</p>
+<table>
+<thead>
+<tr>
+<th>Field on screen</th>
+<th>Value to type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Beverage type</td>
+<td>Spirits</td>
+</tr>
+<tr>
+<td>Brand name</td>
+<td><code>Old Tom Distillery</code></td>
+</tr>
+<tr>
+<td>Class / type</td>
+<td><code>Kentucky Straight Bourbon Whiskey</code></td>
+</tr>
+<tr>
+<td>Alcohol content</td>
+<td><code>45% Alc./Vol.</code></td>
+</tr>
+<tr>
+<td>Net contents</td>
+<td><code>750 mL</code></td>
+</tr>
+<tr>
+<td>Bottler / producer name &amp; address</td>
+<td><code>Old Tom Distillery, Louisville, KY</code></td>
+</tr>
+<tr>
+<td>Country of origin</td>
+<td><em>(leave blank)</em></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Expected:</strong> Overall <strong>Match</strong>. <strong>Net contents</strong> matches — the app converts 75 cl to<br>
+750 mL before comparing.</p>
+<hr>
+<h3 id="test-4-government-warning-not-in-capitals-expect-mismatch">Test 4 — Government Warning not in capitals (expect: <span class="badge" style="color:var(--mismatch)">✗ Mismatch</span>)</h3>
+<p>Image: <strong><code>warning_titlecase.png</code></strong> (the label says "Government Warning:" in title case)</p>
+<table>
+<thead>
+<tr>
+<th>Field on screen</th>
+<th>Value to type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Beverage type</td>
+<td>Spirits</td>
+</tr>
+<tr>
+<td>Brand name</td>
+<td><code>Old Tom Distillery</code></td>
+</tr>
+<tr>
+<td>Class / type</td>
+<td><code>Kentucky Straight Bourbon Whiskey</code></td>
+</tr>
+<tr>
+<td>Alcohol content</td>
+<td><code>45% Alc./Vol.</code></td>
+</tr>
+<tr>
+<td>Net contents</td>
+<td><code>750 mL</code></td>
+</tr>
+<tr>
+<td>Bottler / producer name &amp; address</td>
+<td><code>Old Tom Distillery, Louisville, KY</code></td>
+</tr>
+<tr>
+<td>Country of origin</td>
+<td><em>(leave blank)</em></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Expected:</strong> Overall <strong>Mismatch</strong>. In the <strong>Government Health Warning</strong> section, the<br>
+<strong>ALL CAPITALS prefix</strong> sub-check is red ("Prefix must be all capitals; label shows<br>
+'Government Warning:'"). The wording and bold sub-checks still pass.</p>
+<hr>
+<h3 id="test-5-beer-with-no-abv-on-the-label-expect-match">Test 5 — Beer with no ABV on the label (expect: <span class="badge" style="color:var(--match)">✓ Match</span>)</h3>
+<p>Image: <strong><code>beer_no_abv.png</code></strong> (beer doesn't require alcohol content; leave it blank)</p>
+<table>
+<thead>
+<tr>
+<th>Field on screen</th>
+<th>Value to type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Beverage type</td>
+<td>Beer</td>
+</tr>
+<tr>
+<td>Brand name</td>
+<td><code>River Bend Lager</code></td>
+</tr>
+<tr>
+<td>Class / type</td>
+<td><code>Craft Lager</code></td>
+</tr>
+<tr>
+<td>Alcohol content</td>
+<td><em>(leave blank)</em></td>
+</tr>
+<tr>
+<td>Net contents</td>
+<td><code>355 mL</code></td>
+</tr>
+<tr>
+<td>Bottler / producer name &amp; address</td>
+<td><code>River Bend Brewing Co., Portland, OR</code></td>
+</tr>
+<tr>
+<td>Country of origin</td>
+<td><em>(leave blank)</em></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Expected:</strong> Overall <strong>Match</strong>. <strong>Alcohol content</strong> shows <strong>Not required</strong> (grey) because<br>
+beer doesn't require it and you left it blank — not a failure.</p>
+<hr>
+<h3 id="test-6-imported-wine-with-country-of-origin-expect-match">Test 6 — Imported wine with country of origin (expect: <span class="badge" style="color:var(--match)">✓ Match</span>)</h3>
+<p>Image: <strong><code>import_wine.png</code></strong></p>
+<table>
+<thead>
+<tr>
+<th>Field on screen</th>
+<th>Value to type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Beverage type</td>
+<td>Wine</td>
+</tr>
+<tr>
+<td>Brand name</td>
+<td><code>Chateau Mirage</code></td>
+</tr>
+<tr>
+<td>Class / type</td>
+<td><code>Bordeaux Red Wine</code></td>
+</tr>
+<tr>
+<td>Alcohol content</td>
+<td><code>13.5% Alc./Vol.</code></td>
+</tr>
+<tr>
+<td>Net contents</td>
+<td><code>750 mL</code></td>
+</tr>
+<tr>
+<td>Bottler / producer name &amp; address</td>
+<td><code>Fine Wine Imports, Chicago, IL</code></td>
+</tr>
+<tr>
+<td>Country of origin</td>
+<td><code>France</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Expected:</strong> Overall <strong>Match</strong>. <strong>Country of origin</strong> matches even though the label reads<br>
+"Product of France" (the app recognizes the country within the phrase).</p>
+<hr>
+<h3 id="test-7-brand-misspelled-by-one-letter-expect-needs-review">Test 7 — Brand misspelled by one letter (expect: <span class="badge" style="color:var(--review)">⚠ Needs review</span>)</h3>
+<p>Image: <strong><code>misspelled.png</code></strong> (the label reads "OLD TOM DISTILLARY" — note the <em>a</em>)</p>
+<table>
+<thead>
+<tr>
+<th>Field on screen</th>
+<th>Value to type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Beverage type</td>
+<td>Spirits</td>
+</tr>
+<tr>
+<td>Brand name</td>
+<td><code>Old Tom Distillery</code></td>
+</tr>
+<tr>
+<td>Class / type</td>
+<td><code>Kentucky Straight Bourbon Whiskey</code></td>
+</tr>
+<tr>
+<td>Alcohol content</td>
+<td><code>45% Alc./Vol.</code></td>
+</tr>
+<tr>
+<td>Net contents</td>
+<td><code>750 mL</code></td>
+</tr>
+<tr>
+<td>Bottler / producer name &amp; address</td>
+<td><code>Old Tom Distillery, Louisville, KY</code></td>
+</tr>
+<tr>
+<td>Country of origin</td>
+<td><em>(leave blank)</em></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Expected:</strong> Overall <strong>Needs review</strong>. <strong>Brand name</strong> is amber ("Close match — check<br>
+spelling…"), so a one-letter difference is surfaced for the agent rather than silently<br>
+passed or hard-failed.</p>
+<hr>
+<h3 id="test-8-unreadable-photo-expect-not-found-with-a-clear-message">Test 8 — Unreadable photo (expect: ? Not found, with a clear message)</h3>
+<p>Image: <strong><code>blurry.png</code></strong> (heavily blurred)</p>
+<table>
+<thead>
+<tr>
+<th>Field on screen</th>
+<th>Value to type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Beverage type</td>
+<td>Spirits</td>
+</tr>
+<tr>
+<td>Brand name</td>
+<td><code>Old Tom Distillery</code></td>
+</tr>
+<tr>
+<td>Class / type</td>
+<td><code>Kentucky Straight Bourbon Whiskey</code></td>
+</tr>
+<tr>
+<td>Alcohol content</td>
+<td><code>45% Alc./Vol.</code></td>
+</tr>
+<tr>
+<td>Net contents</td>
+<td><code>750 mL</code></td>
+</tr>
+<tr>
+<td>Bottler / producer name &amp; address</td>
+<td><code>Old Tom Distillery, Louisville, KY</code></td>
+</tr>
+<tr>
+<td>Country of origin</td>
+<td><em>(leave blank)</em></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Expected:</strong> A plain message — "We couldn't read this image clearly. Try a straight,<br>
+well-lit photo of the label." The app says it can't read the image instead of guessing.</p>
+<h3 id="also-worth-trying-bad-upload-error-handling">Also worth trying: bad upload (error handling)</h3>
+<p>On the <strong>Check one label</strong> tab, choose a non-image file (e.g. <code>samples/applications.csv</code>)<br>
+as the label and click <strong>Check label</strong>. You should get a plain-English error: <em>"This file<br>
+isn't an image. Upload a JPG or PNG."</em> — never a stack trace or error code.</p>
+<hr>
+<h2 id="part-2-batch">Part 2 — Batch</h2>
+<p>The batch flow checks many labels at once from one CSV and one ZIP of images.</p>
+<p>Go to the <strong>Check a batch</strong> tab and:</p>
+<ol>
+<li><strong>Applications file (CSV):</strong> choose <strong><code>samples/applications.csv</code></strong></li>
+<li><strong>Label images (ZIP):</strong> choose <strong><code>samples/images.zip</code></strong><br>
+   - <code>samples/images.zip</code> already contains all 15 sample images. If you've regenerated the<br>
+     samples and need to rebuild it: <code>cd samples/labels &amp;&amp; zip ../images.zip *.png</code></li>
+<li>Click <strong>Check all labels</strong>.</li>
+</ol>
+<p><strong>What to expect:</strong><br>
+- A short validation summary (for this clean set, no problems — all 15 pair up).<br>
+- A progress bar filling in ("15 of 15 checked").<br>
+- A results table, one row per label, with an <strong>Overall</strong> status badge.</p>
+<p><strong>Then verify the batch tools:</strong><br>
+- <strong>Filter by status</strong> — click <strong>Mismatch</strong>; you should see 5 rows:<br>
+<code>wrong_abv.png</code>, <code>bad_proof.png</code>, <code>warning_titlecase.png</code>, <code>warning_reworded.png</code>,<br>
+<code>warning_not_bold.png</code>. Click <strong>Needs review</strong> to see <code>misspelled.png</code>.<br>
+- <strong>Open a row</strong> — click <strong>Open</strong> on any row to drill into its full per-field result, then<br>
+<strong>← Back to all results</strong>.<br>
+- <strong>Download results (CSV)</strong> — downloads every field result for every label.</p>
+<p><strong>Expected overall distribution for the sample set (15 labels):</strong></p>
+<table>
+<thead>
+<tr>
+<th>Overall status</th>
+<th>Count</th>
+<th>Labels</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><span class="badge" style="color:var(--match)">✓ Match</span></td>
+<td>7</td>
+<td>clean, stones_throw, units, beer_no_abv, import_wine, angle, glare</td>
+</tr>
+<tr>
+<td><span class="badge" style="color:var(--mismatch)">✗ Mismatch</span></td>
+<td>5</td>
+<td>wrong_abv, bad_proof, warning_titlecase, warning_reworded, warning_not_bold</td>
+</tr>
+<tr>
+<td>? Not found</td>
+<td>2</td>
+<td>blurry, warning_missing</td>
+</tr>
+<tr>
+<td><span class="badge" style="color:var(--review)">⚠ Needs review</span></td>
+<td>1</td>
+<td>misspelled</td>
+</tr>
+</tbody>
+</table>
+<h3 id="batch-error-handling-optional">Batch error handling (optional)</h3>
+<p>Upload a CSV missing a column, or a ZIP whose images don't match the CSV rows, and the app<br>
+reports <strong>all</strong> the problems up front (e.g. "Image 'x.png' has no row in the CSV.") before<br>
+processing anything.</p>
+<hr>
+<h2 id="what-passing-looks-like">What "passing" looks like</h2>
+<ul>
+<li>Every single-image test above produces the <strong>Expected</strong> result.</li>
+<li>The batch run completes, the filter/open/download tools work, and the overall counts<br>
+  match the table (7 / 5 / 2 / 1).</li>
+<li>Each label comes back in well under 5 seconds (typically a fraction of a second).</li>
+</ul>
+<p>The expected result for every sample is also recorded in <code>samples/expected.json</code>, which the<br>
+automated golden-sample tests check against (<code>cd backend &amp;&amp; pytest</code>).</p>
+<div class="footer">LabelCheck documentation · <a href="README.html">Home</a></div>
+</div></main>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mermaid/10.9.1/mermaid.min.js"></script>
+<script>
+  if (window.mermaid) {
+    const dark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    mermaid.initialize({ startOnLoad: true, theme: dark ? 'dark' : 'default' });
+  }
+</script>
+</body>
+</html>

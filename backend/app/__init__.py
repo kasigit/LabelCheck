@@ -1,0 +1,1 @@
+"""LabelCheck backend application package."""

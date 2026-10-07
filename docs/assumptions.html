@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Assumptions — LabelCheck</title>
+<style>
+:root {
+  --bg: #ffffff; --fg: #1f2328; --muted: #656d76; --border: #d0d7de;
+  --accent: #0969da; --code-bg: #f6f8fa; --table-head: #f6f8fa;
+  --match: #15803d; --review: #b45309; --mismatch: #b91c1c;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0d1117; --fg: #e6edf3; --muted: #9198a1; --border: #30363d;
+    --accent: #4493f8; --code-bg: #161b22; --table-head: #161b22;
+    --match: #3fb950; --review: #d29922; --mismatch: #f85149;
+  }
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; background: var(--bg); color: var(--fg);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-size: 17px; line-height: 1.7;
+}
+.layout { display: flex; gap: 0; max-width: 1100px; margin: 0 auto; }
+nav.side {
+  flex: 0 0 240px; padding: 28px 16px; border-right: 1px solid var(--border);
+  position: sticky; top: 0; align-self: flex-start; height: 100vh; overflow-y: auto;
+}
+nav.side .brand { font-size: 20px; font-weight: 800; margin: 0 0 4px; }
+nav.side .tagline { font-size: 13px; color: var(--muted); margin: 0 0 18px; }
+nav.side a {
+  display: block; padding: 8px 12px; border-radius: 6px; color: var(--fg);
+  text-decoration: none; font-size: 15px; margin-bottom: 2px;
+}
+nav.side a:hover { background: var(--code-bg); }
+nav.side a.active { background: var(--accent); color: #fff; font-weight: 600; }
+main { flex: 1 1 auto; padding: 32px 40px 80px; min-width: 0; }
+.content { max-width: 820px; }
+h1 { font-size: 2em; border-bottom: 2px solid var(--border); padding-bottom: .3em; margin-top: 0; }
+h2 { font-size: 1.5em; border-bottom: 1px solid var(--border); padding-bottom: .3em; margin-top: 2em; }
+h3 { font-size: 1.2em; margin-top: 1.8em; }
+a { color: var(--accent); }
+p, li { font-size: 1rem; }
+blockquote {
+  margin: 1em 0; padding: .6em 1em; border-left: 4px solid var(--accent);
+  background: var(--code-bg); border-radius: 0 6px 6px 0; color: var(--fg);
+}
+blockquote p { margin: .3em 0; }
+code {
+  background: var(--code-bg); padding: .15em .4em; border-radius: 5px;
+  font-family: "SF Mono", ui-monospace, "Cascadia Code", Menlo, Consolas, monospace; font-size: .88em;
+}
+pre {
+  background: var(--code-bg); border: 1px solid var(--border); border-radius: 8px;
+  padding: 14px 16px; overflow-x: auto; line-height: 1.5;
+}
+pre code { background: none; padding: 0; font-size: .85em; }
+table { border-collapse: collapse; width: 100%; margin: 1.2em 0; font-size: .95rem; }
+th, td { border: 1px solid var(--border); padding: 8px 12px; text-align: left; vertical-align: top; }
+th { background: var(--table-head); font-weight: 600; }
+tr:nth-child(even) td { background: color-mix(in srgb, var(--code-bg) 55%, transparent); }
+hr { border: none; border-top: 1px solid var(--border); margin: 2.5em 0; }
+.badge { display: inline-block; padding: .05em .5em; border-radius: 999px; font-weight: 700; font-size: .95em; }
+.mermaid { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 16px; text-align: center; }
+.footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid var(--border); color: var(--muted); font-size: .9em; }
+@media (max-width: 800px) {
+  .layout { flex-direction: column; }
+  nav.side { position: static; height: auto; width: 100%; border-right: none; border-bottom: 1px solid var(--border); flex-basis: auto; }
+  main { padding: 20px 16px 60px; }
+}
+</style>
+</head>
+<body>
+<div class="layout">
+<nav class="side"><p class="brand">LabelCheck</p><p class="tagline">Alcohol-label verification</p><a href="README.html">Overview</a><a href="DOCUMENTATION.html">Full Documentation</a><a href="HOW_TO_VERIFY.html">How to Verify</a><a href="assumptions.html" class="active">Assumptions</a></nav>
+<main><div class="content">
+<h1 id="assumptions">Assumptions</h1>
+<p>Decisions made where the requirements left things open, or where a domain rule needed a<br>
+concrete interpretation. Each is something a reviewer should be able to challenge. Where a<br>
+decision favors caution, it does so by sending a label to <strong>Needs review</strong> rather than<br>
+guessing.</p>
+<h2 id="where-the-application-data-comes-from">Where the application data comes from</h2>
+<p>There is no COLA integration, so the "expected" values come from the user:<br>
+- <strong>Single check:</strong> a form the agent fills in.<br>
+- <strong>Batch:</strong> a CSV (<code>applications.csv</code>), one row per label, paired with a ZIP of images by<br>
+  filename. The CSV columns are <code>image_filename, beverage_type, brand_name, class_type,
+  alcohol_content, net_contents, bottler_name_address, country_of_origin</code>.</p>
+<h2 id="government-warning-wording">Government Warning wording</h2>
+<p>The reference statement is the 27 CFR Part 16 text, kept as a single constant in<br>
+<code>backend/app/services/warning.py</code>:</p>
+<blockquote>
+<p>GOVERNMENT WARNING: (1) According to the Surgeon General, women should not drink<br>
+alcoholic beverages during pregnancy because of the risk of birth defects. (2)<br>
+Consumption of alcoholic beverages impairs your ability to drive a car or operate<br>
+machinery, and may cause health problems.</p>
+</blockquote>
+<p><strong>Verify this against ttb.gov before any production use</strong> and update the one constant if it<br>
+changes.</p>
+<h2 id="how-the-warning-wording-is-compared">How the warning wording is compared</h2>
+<p>A literal character-for-character comparison is unworkable in practice: OCR routinely<br>
+drops or garbles whole lines even on clean images. Instead we compare at the <strong>word</strong><br>
+level, in two directions:<br>
+- A word on the label that does <strong>not</strong> appear in the standard statement (e.g. "reduces"<br>
+  where the standard says "impairs") is treated as a genuine rewording → <strong>Mismatch</strong>.<br>
+  If the warning was read with low OCR confidence, this is downgraded to <strong>Needs review</strong>.<br>
+- Words the standard has that the label is <strong>missing</strong> are tolerated up to ~45% (usually a<br>
+  dropped OCR line, not a wrong label). Beyond that → <strong>Needs review</strong>, not a confident<br>
+  match.</p>
+<p>The all-capitals and bold checks are separate and stricter (below).</p>
+<h2 id="detecting-bold-the-warning-prefix">Detecting bold (the warning prefix)</h2>
+<p>OCR can't report font weight, so we estimate <strong>stroke width</strong>: binarize the prefix's<br>
+bounding box and the body text's boxes, run a distance transform, and compare the median<br>
+stroke width. Ratio ≥ 1.25 → bold; 1.05–1.25 → review; &lt; 1.05 → not bold. Text too small<br>
+to measure (&lt; 12 px tall) → review. This is a heuristic; borderline cases are sent to<br>
+review for the agent to judge.</p>
+<h2 id="beverage-type-rules">Beverage-type rules</h2>
+<p>Encoded in <code>backend/app/rules/beverage_rules.yaml</code>:<br>
+- <strong>Alcohol content</strong> is required for spirits; optional for beer and wine. The prototype<br>
+  trusts the application: if a value is provided we check it, if it is blank we mark the<br>
+  field <strong>Not required</strong>. (Real TTB rules have finer exceptions for specific beers/wines.)<br>
+- <strong>Country of origin</strong> applies to imports only. We treat a non-blank application value as<br>
+  "this is an import" and then require/check it. A blank value → <strong>Not required</strong>.<br>
+- All other listed fields are required for every beverage type.</p>
+<h2 id="matching-tolerances">Matching tolerances</h2>
+<ul>
+<li><strong>Text fields</strong> (brand, class/type, bottler, country): normalized (Unicode NFKC,<br>
+  casefold, straightened quotes, separators→spaces, collapsed whitespace) then compared.<br>
+  Equal after normalization → match. RapidFuzz token ratio ≥ 85 but not equal → review.<br>
+  Below 85 → mismatch. The canonical case <code>STONE'S THROW</code> vs <code>Stone's Throw</code> → <strong>match</strong>.</li>
+<li><strong>Bottler address</strong> and <strong>country</strong> use <code>token_set_ratio</code>, so reordered address lines<br>
+  and prefixes like "Product of France" (vs application "France") still match.</li>
+<li><strong>Alcohol content</strong> is parsed to a number and compared numerically (never fuzzed). If a<br>
+  proof is printed, it must equal 2 × ABV. Low-confidence number reads → review.</li>
+<li><strong>Net contents</strong> is converted to millilitres and compared; within 1% (fl-oz rounding) →<br>
+  match. So <code>75 cl</code>, <code>750 mL</code>, and <code>750ML</code> all match <code>750 mL</code>.</li>
+</ul>
+<h2 id="unreadable-images">Unreadable images</h2>
+<p>If OCR returns no text (too blurry/dark), the app does <strong>not</strong> guess. It returns a clear<br>
+"We couldn't read this image clearly" message and an overall status of <strong>Not found</strong>.</p>
+<h2 id="test-data">Test data</h2>
+<p>The sample labels in <code>samples/</code> are generated (drawn) by <code>scripts/generate_samples.py</code><br>
+rather than photographed, so the set is reproducible offline and needs no image-generation<br>
+service. They cover clean labels, unit differences, wrong/inconsistent ABV, all the<br>
+warning failure modes, and imperfect images (angle, glare, blur). <code>expected.json</code> records<br>
+the expected outcome for each.</p>
+<div class="footer">LabelCheck documentation · <a href="README.html">Home</a></div>
+</div></main>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mermaid/10.9.1/mermaid.min.js"></script>
+<script>
+  if (window.mermaid) {
+    const dark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    mermaid.initialize({ startOnLoad: true, theme: dark ? 'dark' : 'default' });
+  }
+</script>
+</body>
+</html>

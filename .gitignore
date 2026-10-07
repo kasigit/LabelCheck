@@ -1,0 +1,20 @@
+# macOS
+.DS_Store
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+.ruff_cache/
+.pytest_cache/
+.env
+
+# Node / frontend
+node_modules/
+frontend/dist/
+
+# Build / editor
+*.egg-info/
+build/
+.vscode/
+.idea/

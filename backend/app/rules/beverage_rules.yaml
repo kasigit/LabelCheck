@@ -1,0 +1,47 @@
+# Which fields are required for each beverage type.
+#
+# This encodes the table in the `label-rules` skill. The matching layer reads it to
+# decide whether a blank application value means NOT_REQUIRED (fine) or NOT_FOUND
+# (a required field missing from the label).
+#
+#   required  -> must be present; if the application provides a value we check it,
+#                and a value missing from the label is NOT_FOUND.
+#   optional  -> if the application provides a value we check it; if blank => NOT_REQUIRED.
+#                (Exceptions exist for some beers/wines; the prototype trusts the
+#                 application: a provided value is checked, a blank one is not required.)
+#   imports   -> required only when the application provides a value (a non-blank value
+#                is treated as "this is an import").
+#
+# Government Warning is always required and is handled separately by warning.py.
+
+fields:
+  brand_name:
+    label: "Brand name"
+    beer: required
+    wine: required
+    spirits: required
+  class_type:
+    label: "Class/type"
+    beer: required
+    wine: required
+    spirits: required
+  alcohol_content:
+    label: "Alcohol content"
+    beer: optional
+    wine: optional
+    spirits: required
+  net_contents:
+    label: "Net contents"
+    beer: required
+    wine: required
+    spirits: required
+  bottler_name_address:
+    label: "Bottler / producer name & address"
+    beer: required
+    wine: required
+    spirits: required
+  country_of_origin:
+    label: "Country of origin"
+    beer: imports
+    wine: imports
+    spirits: imports

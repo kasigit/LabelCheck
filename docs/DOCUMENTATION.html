@@ -1,0 +1,457 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Full Documentation — LabelCheck</title>
+<style>
+:root {
+  --bg: #ffffff; --fg: #1f2328; --muted: #656d76; --border: #d0d7de;
+  --accent: #0969da; --code-bg: #f6f8fa; --table-head: #f6f8fa;
+  --match: #15803d; --review: #b45309; --mismatch: #b91c1c;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0d1117; --fg: #e6edf3; --muted: #9198a1; --border: #30363d;
+    --accent: #4493f8; --code-bg: #161b22; --table-head: #161b22;
+    --match: #3fb950; --review: #d29922; --mismatch: #f85149;
+  }
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; background: var(--bg); color: var(--fg);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-size: 17px; line-height: 1.7;
+}
+.layout { display: flex; gap: 0; max-width: 1100px; margin: 0 auto; }
+nav.side {
+  flex: 0 0 240px; padding: 28px 16px; border-right: 1px solid var(--border);
+  position: sticky; top: 0; align-self: flex-start; height: 100vh; overflow-y: auto;
+}
+nav.side .brand { font-size: 20px; font-weight: 800; margin: 0 0 4px; }
+nav.side .tagline { font-size: 13px; color: var(--muted); margin: 0 0 18px; }
+nav.side a {
+  display: block; padding: 8px 12px; border-radius: 6px; color: var(--fg);
+  text-decoration: none; font-size: 15px; margin-bottom: 2px;
+}
+nav.side a:hover { background: var(--code-bg); }
+nav.side a.active { background: var(--accent); color: #fff; font-weight: 600; }
+main { flex: 1 1 auto; padding: 32px 40px 80px; min-width: 0; }
+.content { max-width: 820px; }
+h1 { font-size: 2em; border-bottom: 2px solid var(--border); padding-bottom: .3em; margin-top: 0; }
+h2 { font-size: 1.5em; border-bottom: 1px solid var(--border); padding-bottom: .3em; margin-top: 2em; }
+h3 { font-size: 1.2em; margin-top: 1.8em; }
+a { color: var(--accent); }
+p, li { font-size: 1rem; }
+blockquote {
+  margin: 1em 0; padding: .6em 1em; border-left: 4px solid var(--accent);
+  background: var(--code-bg); border-radius: 0 6px 6px 0; color: var(--fg);
+}
+blockquote p { margin: .3em 0; }
+code {
+  background: var(--code-bg); padding: .15em .4em; border-radius: 5px;
+  font-family: "SF Mono", ui-monospace, "Cascadia Code", Menlo, Consolas, monospace; font-size: .88em;
+}
+pre {
+  background: var(--code-bg); border: 1px solid var(--border); border-radius: 8px;
+  padding: 14px 16px; overflow-x: auto; line-height: 1.5;
+}
+pre code { background: none; padding: 0; font-size: .85em; }
+table { border-collapse: collapse; width: 100%; margin: 1.2em 0; font-size: .95rem; }
+th, td { border: 1px solid var(--border); padding: 8px 12px; text-align: left; vertical-align: top; }
+th { background: var(--table-head); font-weight: 600; }
+tr:nth-child(even) td { background: color-mix(in srgb, var(--code-bg) 55%, transparent); }
+hr { border: none; border-top: 1px solid var(--border); margin: 2.5em 0; }
+.badge { display: inline-block; padding: .05em .5em; border-radius: 999px; font-weight: 700; font-size: .95em; }
+.mermaid { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 16px; text-align: center; }
+.footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid var(--border); color: var(--muted); font-size: .9em; }
+@media (max-width: 800px) {
+  .layout { flex-direction: column; }
+  nav.side { position: static; height: auto; width: 100%; border-right: none; border-bottom: 1px solid var(--border); flex-basis: auto; }
+  main { padding: 20px 16px 60px; }
+}
+</style>
+</head>
+<body>
+<div class="layout">
+<nav class="side"><p class="brand">LabelCheck</p><p class="tagline">Alcohol-label verification</p><a href="README.html">Overview</a><a href="DOCUMENTATION.html" class="active">Full Documentation</a><a href="HOW_TO_VERIFY.html">How to Verify</a><a href="assumptions.html">Assumptions</a></nav>
+<main><div class="content">
+<h1 id="labelcheck-full-documentation">LabelCheck — Full Documentation</h1>
+<ul>
+<li><a href="#1-what-the-application-does">1. What the application does</a></li>
+<li><a href="#2-architecture">2. Architecture</a></li>
+<li><a href="#3-the-verification-pipeline">3. The verification pipeline</a></li>
+<li><a href="#4-tech-stack-and-why">4. Tech stack and why</a></li>
+<li><a href="#5-constraints-and-how-they-are-met">5. Constraints and how they are met</a></li>
+<li><a href="#6-performance">6. Performance</a></li>
+<li><a href="#7-data-handling--privacy">7. Data handling &amp; privacy</a></li>
+<li><a href="#8-api-reference">8. API reference</a></li>
+<li><a href="#9-testing">9. Testing</a></li>
+<li><a href="#10-assumptions">10. Assumptions</a></li>
+</ul>
+<hr>
+<h2 id="1-what-the-application-does">1. What the application does</h2>
+<p>LabelCheck helps a TTB compliance agent confirm that an <strong>alcohol label image</strong> matches the<br>
+<strong>application data</strong> submitted for it. The agent provides both; the tool reads the label and<br>
+reports, field by field, whether each required detail matches — then lets the agent decide.</p>
+<p>It checks the fields required by beverage type:</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Beer</th>
+<th>Wine</th>
+<th>Spirits</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Brand name</td>
+<td>✓</td>
+<td>✓</td>
+<td>✓</td>
+</tr>
+<tr>
+<td>Class/type designation</td>
+<td>✓</td>
+<td>✓</td>
+<td>✓</td>
+</tr>
+<tr>
+<td>Alcohol content</td>
+<td>optional</td>
+<td>optional</td>
+<td>✓</td>
+</tr>
+<tr>
+<td>Net contents</td>
+<td>✓</td>
+<td>✓</td>
+<td>✓</td>
+</tr>
+<tr>
+<td>Bottler/producer name &amp; address</td>
+<td>✓</td>
+<td>✓</td>
+<td>✓</td>
+</tr>
+<tr>
+<td>Country of origin</td>
+<td>imports</td>
+<td>imports</td>
+<td>imports</td>
+</tr>
+<tr>
+<td>Government Health Warning</td>
+<td>✓</td>
+<td>✓</td>
+<td>✓</td>
+</tr>
+</tbody>
+</table>
+<p>Each field gets one of five statuses — <strong>Match</strong>, <strong>Needs review</strong>, <strong>Mismatch</strong>,<br>
+<strong>Not found</strong>, <strong>Not required</strong> — shown as icon + word + color. The overall result is the<br>
+worst status across all fields (the tool never says "Match" if the warning is missing).</p>
+<p><strong>Requirements coverage:</strong> FR‑1 (image + application input) · FR‑2 (OCR read) · FR‑3<br>
+(per-field pass/fail) · FR‑4 (three-way fuzzy match for ordinary fields) · FR‑5 (strict<br>
+Government Warning: wording, capitals, bold) · FR‑6 (expected vs found + reason shown) ·<br>
+FR‑7 (batch of CSV + ZIP with a summary) · FR‑8 (copes with angle/glare, says so when<br>
+unreadable).</p>
+<hr>
+<h2 id="2-architecture">2. Architecture</h2>
+<p>One FastAPI process serves both the JSON API and the built React app. There is no database<br>
+and no external service — everything runs in-process on CPU.</p>
+<pre><code>                        Browser (compliance agent)
+            ┌───────────────────────────────────────────────┐
+            │  React + TypeScript SPA (Vite build)           │
+            │  • Check one label     • Check a batch         │
+            │  • downscales images client-side before upload │
+            └───────────────┬───────────────────────────────┘
+                            │  HTTPS, same origin
+                            │  multipart upload / JSON  (/api/*)
+                            ▼
+            ┌───────────────────────────────────────────────┐
+            │  FastAPI (single container)                    │
+            │                                                │
+            │  api/        thin route handlers               │
+            │   ├─ /api/verify      single label             │
+            │   ├─ /api/batch       CSV + ZIP → job          │
+            │   └─ /api/batch/{id}  status + partial results │
+            │                                                │
+            │  services/   business logic (pure where able)  │
+            │   preprocess → ocr → extract → matching        │
+            │                                └─ warning       │
+            │                                                │
+            │  in-memory batch store (TTL 1h, no disk)       │
+            │  OCR model loaded ONCE at startup (lifespan)   │
+            │                                                │
+            │  StaticFiles ── serves the React build ────────┼──► UI
+            └───────────────────────────────────────────────┘
+                 No outbound network calls. Models baked in.
+</code></pre>
+<p>The same flow as a Mermaid diagram (renders on GitHub):</p>
+<pre class="mermaid">flowchart TD
+    subgraph Browser
+      UI[&quot;React SPA&lt;br/&gt;Single + Batch pages&quot;]
+    end
+    subgraph Server[&quot;FastAPI container (CPU, offline)&quot;]
+      API[&quot;api/ route handlers&quot;]
+      PRE[&quot;preprocess.py&lt;br/&gt;OpenCV: resize, deskew, CLAHE&quot;]
+      OCR[&quot;ocr.py&lt;br/&gt;RapidOCR (ONNX, local models)&quot;]
+      EXT[&quot;extract.py&lt;br/&gt;find candidate values&quot;]
+      MAT[&quot;matching.py&lt;br/&gt;fuzzy / numeric / unit-aware&quot;]
+      WARN[&quot;warning.py&lt;br/&gt;wording · capitals · bold&quot;]
+      STORE[(&quot;in-memory batch store&lt;br/&gt;TTL 1h&quot;)]
+      STATIC[&quot;StaticFiles&lt;br/&gt;serves React build&quot;]
+    end
+
+    UI -- &quot;multipart /api/verify&quot; --&gt; API
+    UI -- &quot;CSV + ZIP /api/batch&quot; --&gt; API
+    API --&gt; PRE --&gt; OCR --&gt; EXT --&gt; MAT --&gt; API
+    OCR --&gt; WARN --&gt; API
+    API &lt;--&gt; STORE
+    STATIC --&gt; UI
+</pre>
+<p><strong>Layers, strictly separated:</strong><br>
+- <code>api/</code> — request validation and shaping only; no business logic.<br>
+- <code>services/</code> — the pipeline; mostly pure functions (input → output) so they unit-test<br>
+  cleanly and run safely in worker processes.<br>
+- <code>models.py</code> — Pydantic models that are the single source of truth for the API contract<br>
+  and the frontend's generated types.</p>
+<hr>
+<h2 id="3-the-verification-pipeline">3. The verification pipeline</h2>
+<p>For one label (<code>backend/app/services/pipeline.py</code>):</p>
+<ol>
+<li><strong>Preprocess</strong> (<code>preprocess.py</code>, OpenCV): decode → resize to ≤ 2000px long edge →<br>
+   grayscale → estimate and correct small skew → CLAHE on the lightness channel to lift<br>
+   contrast and tame glare. The deskewed <strong>color</strong> image is kept for the bold check.</li>
+<li><strong>OCR</strong> (<code>ocr.py</code>, RapidOCR): returns text lines with bounding boxes and per-line<br>
+   confidence. Boxes are kept — the bold check and future "where on the label" features<br>
+   need them. The engine is loaded once at startup and reused.</li>
+<li><strong>Extract</strong> (<code>extract.py</code>): rather than parse a label from scratch, it uses each<br>
+   expected value to <em>find</em> the best-matching OCR line(s); numeric fields are found by<br>
+   pattern.</li>
+<li><strong>Match + warning</strong> (<code>matching.py</code>, <code>warning.py</code>): compares each field per the TTB<br>
+   rules and runs the three Government-Warning sub-checks. The worst status wins overall.</li>
+</ol>
+<p>Timings for every stage (<code>preprocess</code>, <code>ocr</code>, <code>match</code>, <code>total</code>) are returned in the<br>
+response and logged; a label over the budget logs a warning.</p>
+<p>For a <strong>batch</strong>, the CSV and ZIP are validated up front (columns, per-row required fields,<br>
+every row has an image and vice-versa, file types, zip-slip/zip-bomb guards) and <strong>all</strong><br>
+problems are returned at once. Valid pairs are processed in a <code>ProcessPoolExecutor</code> sized<br>
+to the CPU count, with results streamed into an in-memory job as each finishes so the UI<br>
+shows live progress.</p>
+<hr>
+<h2 id="4-tech-stack-and-why">4. Tech stack and why</h2>
+<table>
+<thead>
+<tr>
+<th>Layer</th>
+<th>Choice</th>
+<th>Why this fits a firewalled, 5-second, prototype</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>OCR</td>
+<td><strong>RapidOCR</strong> (PaddleOCR models on ONNX Runtime, CPU)</td>
+<td>Accurate, <strong>fully local</strong> — the models ship inside the pip wheel, so there is no runtime download and no external call. Fast on CPU (hundreds of ms/label), which is what the 5-second budget and the firewall both demand.</td>
+</tr>
+<tr>
+<td>Image processing</td>
+<td><strong>OpenCV</strong></td>
+<td>Battle-tested, local, cheap. Handles resize, deskew, contrast/glare (CLAHE), and the stroke-width math behind the bold check.</td>
+</tr>
+<tr>
+<td>Fuzzy matching</td>
+<td><strong>RapidFuzz</strong></td>
+<td>Fast C++-backed string similarity for the three-way match (match / review / mismatch) and for locating fields in OCR output.</td>
+</tr>
+<tr>
+<td>Backend</td>
+<td><strong>FastAPI + Pydantic v2</strong></td>
+<td>Minimal, typed, async. Pydantic models double as the OpenAPI contract the frontend types are generated from, so the two sides can't drift.</td>
+</tr>
+<tr>
+<td>Frontend</td>
+<td><strong>React 18 + TypeScript + Vite + Tailwind + TanStack Query</strong></td>
+<td>Fast, typed, small. Tailwind makes the large-type, high-contrast accessibility rules easy to apply consistently; TanStack Query handles the batch polling and loading/error states cleanly.</td>
+</tr>
+<tr>
+<td>Packaging</td>
+<td><strong>Single Docker container</strong></td>
+<td>FastAPI serves the React build, so there's one artifact to deploy (→ Azure Container Apps). Models baked in at build time keep the runtime offline.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Why not a cloud vision API?</strong> The agency firewall blocked the previous vendor's cloud ML,<br>
+and the 5-second budget leaves no room for round-trips. Local OCR removes both risks. A<br>
+cloud vision model remains possible as an <em>optional</em> upgrade: it sits behind<br>
+<code>LABELCHECK_CLOUD_VISION</code> (off by default) and the app works fully without it.</p>
+<p><strong>Why these suit a prototype, not an enterprise build:</strong> no database, no message queue, no<br>
+auth service — just a stateless container with in-memory batch jobs. It's small enough to<br>
+read in an afternoon and fast to deploy, while the clean service boundaries leave room to<br>
+grow (persistency, a cloud-vision fallback, COLA integration) without a rewrite.</p>
+<hr>
+<h2 id="5-constraints-and-how-they-are-met">5. Constraints and how they are met</h2>
+<table>
+<thead>
+<tr>
+<th>Constraint</th>
+<th>How LabelCheck meets it</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>≤ 5 s per label</strong></td>
+<td>Local CPU OCR; model loaded once at startup; OCR runs off the event loop; per-stage timings logged. Measured worst case ≈ 0.35 s/label on a laptop.</td>
+</tr>
+<tr>
+<td><strong>Usable by non-technical users</strong></td>
+<td>18px base font, large full-width buttons (≥ 44px targets), two always-visible tabs, plain button verbs, status as icon+word+color, plain-English errors, keyboard-accessible with visible focus.</td>
+</tr>
+<tr>
+<td><strong>No outbound network at runtime</strong></td>
+<td>OCR models bundled in the wheel/image; no dependency calls out; optional cloud vision is off by default and fails soft.</td>
+</tr>
+<tr>
+<td><strong>No persistent storage</strong></td>
+<td>Uploads processed in memory; batch results held in an in-memory store with a 1-hour TTL; nothing written to disk or a database.</td>
+</tr>
+<tr>
+<td><strong>Agent makes the final call</strong></td>
+<td>The tool only flags. Ambiguous results are <strong>Needs review</strong>, never auto-rejected.</td>
+</tr>
+<tr>
+<td><strong>Rules depend on beverage type</strong></td>
+<td><code>beverage_rules.yaml</code> drives which fields are required; ABV optional for beer/wine, country for imports only.</td>
+</tr>
+<tr>
+<td><strong>Standalone (no COLA)</strong></td>
+<td>Application data comes from the form or the batch CSV.</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="6-performance">6. Performance</h2>
+<p>The budget is ≤ 5 s end-to-end, target ≤ 3 s. Measured over the 15 sample labels on a<br>
+laptop (server-side <code>total</code>): <strong>~95–350 ms per label</strong>. Headroom comes from:<br>
+- Loading the OCR model once (<code>lifespan</code>), so cold start is never on the request path.<br>
+- Capping the image at 2000px (downscaled client-side too).<br>
+- Running OCR in a thread/process pool so the async server stays responsive.</p>
+<p>The performance test asserts both end-to-end <code>&lt; 5 s</code> and server <code>total &lt; 4 s</code> for every<br>
+sample, so regressions are caught in CI.</p>
+<hr>
+<h2 id="7-data-handling-privacy">7. Data handling &amp; privacy</h2>
+<ul>
+<li><strong>No PII at rest.</strong> Images and results are never written to disk or a database.</li>
+<li>Single-label requests are processed from in-memory bytes and discarded when the response<br>
+  is sent.</li>
+<li>Batch jobs live in an in-memory dict keyed by a random UUID, swept after a 1-hour TTL.</li>
+<li>Logs never include image contents or full field values at INFO level.</li>
+<li>Uploads are bounded (image ≤ 20 MB; ZIP ≤ 500 MB / ≤ 500 images / uncompressed cap) and<br>
+  ZIPs are read with zip-slip and zip-bomb guards.</li>
+</ul>
+<hr>
+<h2 id="8-api-reference">8. API reference</h2>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Path</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>GET</code></td>
+<td><code>/api/health</code></td>
+<td>Liveness + whether the OCR model is loaded.</td>
+</tr>
+<tr>
+<td><code>POST</code></td>
+<td><code>/api/verify</code></td>
+<td>Multipart: <code>image</code> file + <code>application</code> JSON → <code>VerificationResult</code>.</td>
+</tr>
+<tr>
+<td><code>POST</code></td>
+<td><code>/api/batch</code></td>
+<td>Multipart: <code>csv</code> file + <code>images</code> ZIP → <code>{batch_id, total, problems[]}</code>.</td>
+</tr>
+<tr>
+<td><code>GET</code></td>
+<td><code>/api/batch/{id}</code></td>
+<td><code>{status, done, total, results[]}</code> — partial results while running.</td>
+</tr>
+<tr>
+<td><code>GET</code></td>
+<td><code>/api/batch/{id}/export.csv</code></td>
+<td>Results so far as a CSV download.</td>
+</tr>
+</tbody>
+</table>
+<p>Errors are returned as <code>{"detail": "&lt;plain-English message&gt;"}</code> with an appropriate status<br>
+code (e.g. 415 for a non-image upload). The UI shows <code>detail</code> directly. Full interactive<br>
+docs are available at <code>/docs</code> when the server is running.</p>
+<hr>
+<h2 id="9-testing">9. Testing</h2>
+<table>
+<thead>
+<tr>
+<th>Layer</th>
+<th>Tool</th>
+<th>What it covers</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Matching &amp; warning rules</td>
+<td>pytest</td>
+<td>Every rule row (text/ABV/net-contents, wording/capitals/bold).</td>
+</tr>
+<tr>
+<td>Parsing</td>
+<td>pytest</td>
+<td>ABV/proof, net-contents units, CSV row validation.</td>
+</tr>
+<tr>
+<td>Golden samples</td>
+<td>pytest</td>
+<td>Full pipeline over <code>samples/</code> vs <code>expected.json</code>.</td>
+</tr>
+<tr>
+<td>Performance</td>
+<td>pytest</td>
+<td>Every sample under the 5-second budget.</td>
+</tr>
+<tr>
+<td>API contract</td>
+<td>pytest + TestClient</td>
+<td>Upload validation and error shapes.</td>
+</tr>
+<tr>
+<td>Components / interaction</td>
+<td>Vitest + Testing Library</td>
+<td>Status badges, progress text, errors, the single-check flow.</td>
+</tr>
+</tbody>
+</table>
+<p>Run them with the commands in the <a href="README.html#run-the-tests">README</a>. The pure-logic<br>
+tests run with no OCR engine installed; the golden-sample and performance tests skip<br>
+cleanly if the engine or sample set is absent, and run in CI where both are present.</p>
+<hr>
+<h2 id="10-assumptions">10. Assumptions</h2>
+<p>The open decisions (data source, exact warning wording, the bold heuristic, beverage-type<br>
+rules, matching tolerances) are documented in <a href="assumptions.html">assumptions.md</a>.</p>
+<div class="footer">LabelCheck documentation · <a href="README.html">Home</a></div>
+</div></main>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mermaid/10.9.1/mermaid.min.js"></script>
+<script>
+  if (window.mermaid) {
+    const dark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    mermaid.initialize({ startOnLoad: true, theme: dark ? 'dark' : 'default' });
+  }
+</script>
+</body>
+</html>

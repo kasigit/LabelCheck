@@ -1,0 +1,162 @@
+{
+  "angle.png": {
+    "fields": {
+      "alcohol_content": "match",
+      "bottler_name_address": "match",
+      "brand_name": "match",
+      "class_type": "match",
+      "net_contents": "match",
+      "warning": "match"
+    },
+    "overall": "match"
+  },
+  "bad_proof.png": {
+    "fields": {
+      "alcohol_content": "mismatch",
+      "bottler_name_address": "match",
+      "brand_name": "match",
+      "class_type": "match",
+      "net_contents": "match",
+      "warning": "match"
+    },
+    "overall": "mismatch"
+  },
+  "beer_no_abv.png": {
+    "fields": {
+      "alcohol_content": "not_required",
+      "bottler_name_address": "match",
+      "brand_name": "match",
+      "class_type": "match",
+      "net_contents": "match",
+      "warning": "match"
+    },
+    "overall": "match"
+  },
+  "blurry.png": {
+    "fields": {},
+    "overall": "not_found"
+  },
+  "clean.png": {
+    "fields": {
+      "alcohol_content": "match",
+      "bottler_name_address": "match",
+      "brand_name": "match",
+      "class_type": "match",
+      "net_contents": "match",
+      "warning": "match"
+    },
+    "overall": "match"
+  },
+  "glare.png": {
+    "fields": {
+      "alcohol_content": "match",
+      "bottler_name_address": "match",
+      "brand_name": "match",
+      "class_type": "match",
+      "net_contents": "match",
+      "warning": "match"
+    },
+    "overall": "match"
+  },
+  "import_wine.png": {
+    "fields": {
+      "alcohol_content": "match",
+      "bottler_name_address": "match",
+      "brand_name": "match",
+      "class_type": "match",
+      "country_of_origin": "match",
+      "net_contents": "match",
+      "warning": "match"
+    },
+    "overall": "match"
+  },
+  "misspelled.png": {
+    "fields": {
+      "alcohol_content": "match",
+      "bottler_name_address": "match",
+      "brand_name": "review",
+      "class_type": "match",
+      "net_contents": "match",
+      "warning": "match"
+    },
+    "overall": "review"
+  },
+  "stones_throw.png": {
+    "fields": {
+      "alcohol_content": "match",
+      "bottler_name_address": "match",
+      "brand_name": "match",
+      "class_type": "match",
+      "country_of_origin": "match",
+      "net_contents": "match",
+      "warning": "match"
+    },
+    "overall": "match"
+  },
+  "units.png": {
+    "fields": {
+      "alcohol_content": "match",
+      "bottler_name_address": "match",
+      "brand_name": "match",
+      "class_type": "match",
+      "net_contents": "match",
+      "warning": "match"
+    },
+    "overall": "match"
+  },
+  "warning_missing.png": {
+    "fields": {
+      "alcohol_content": "match",
+      "bottler_name_address": "match",
+      "brand_name": "match",
+      "class_type": "match",
+      "net_contents": "match",
+      "warning": "not_found"
+    },
+    "overall": "not_found"
+  },
+  "warning_not_bold.png": {
+    "fields": {
+      "alcohol_content": "match",
+      "bottler_name_address": "match",
+      "brand_name": "match",
+      "class_type": "match",
+      "net_contents": "match",
+      "warning": "mismatch"
+    },
+    "overall": "mismatch"
+  },
+  "warning_reworded.png": {
+    "fields": {
+      "alcohol_content": "match",
+      "bottler_name_address": "match",
+      "brand_name": "match",
+      "class_type": "match",
+      "net_contents": "match",
+      "warning": "mismatch"
+    },
+    "overall": "mismatch"
+  },
+  "warning_titlecase.png": {
+    "fields": {
+      "alcohol_content": "match",
+      "bottler_name_address": "match",
+      "brand_name": "match",
+      "class_type": "match",
+      "net_contents": "match",
+      "warning": "mismatch"
+    },
+    "overall": "mismatch"
+  },
+  "wrong_abv.png": {
+    "fields": {
+      "alcohol_content": "mismatch",
+      "bottler_name_address": "match",
+      "brand_name": "match",
+      "class_type": "match",
+      "net_contents": "match",
+      "warning": "match"
+    },
+    "overall": "mismatch"
+  }
+}

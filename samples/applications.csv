@@ -1,0 +1,16 @@
+image_filename,beverage_type,brand_name,class_type,alcohol_content,net_contents,bottler_name_address,country_of_origin
+clean.png,spirits,Old Tom Distillery,Kentucky Straight Bourbon Whiskey,45% Alc./Vol.,750 mL,"Old Tom Distillery, Louisville, KY",
+stones_throw.png,spirits,Stone's Throw,Blended Scotch Whisky,43% Alc./Vol.,750 mL,"Stone's Throw Imports, NY, NY",Scotland
+wrong_abv.png,spirits,Old Tom Distillery,Kentucky Straight Bourbon Whiskey,45% Alc./Vol.,750 mL,"Old Tom Distillery, Louisville, KY",
+bad_proof.png,spirits,Old Tom Distillery,Kentucky Straight Bourbon Whiskey,45% Alc./Vol.,750 mL,"Old Tom Distillery, Louisville, KY",
+units.png,spirits,Old Tom Distillery,Kentucky Straight Bourbon Whiskey,45% Alc./Vol.,750 mL,"Old Tom Distillery, Louisville, KY",
+warning_titlecase.png,spirits,Old Tom Distillery,Kentucky Straight Bourbon Whiskey,45% Alc./Vol.,750 mL,"Old Tom Distillery, Louisville, KY",
+warning_reworded.png,spirits,Old Tom Distillery,Kentucky Straight Bourbon Whiskey,45% Alc./Vol.,750 mL,"Old Tom Distillery, Louisville, KY",
+warning_missing.png,spirits,Old Tom Distillery,Kentucky Straight Bourbon Whiskey,45% Alc./Vol.,750 mL,"Old Tom Distillery, Louisville, KY",
+warning_not_bold.png,spirits,Old Tom Distillery,Kentucky Straight Bourbon Whiskey,45% Alc./Vol.,750 mL,"Old Tom Distillery, Louisville, KY",
+angle.png,spirits,Old Tom Distillery,Kentucky Straight Bourbon Whiskey,45% Alc./Vol.,750 mL,"Old Tom Distillery, Louisville, KY",
+glare.png,spirits,Old Tom Distillery,Kentucky Straight Bourbon Whiskey,45% Alc./Vol.,750 mL,"Old Tom Distillery, Louisville, KY",
+beer_no_abv.png,beer,River Bend Lager,Craft Lager,,355 mL,"River Bend Brewing Co., Portland, OR",
+import_wine.png,wine,Chateau Mirage,Bordeaux Red Wine,13.5% Alc./Vol.,750 mL,"Fine Wine Imports, Chicago, IL",France
+blurry.png,spirits,Old Tom Distillery,Kentucky Straight Bourbon Whiskey,45% Alc./Vol.,750 mL,"Old Tom Distillery, Louisville, KY",
+misspelled.png,spirits,Old Tom Distillery,Kentucky Straight Bourbon Whiskey,45% Alc./Vol.,750 mL,"Old Tom Distillery, Louisville, KY",
