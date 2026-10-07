@@ -1,5 +1,11 @@
 # LabelCheck
 
+> 📖 **Prefer a nicely formatted version?** Open **[`docs/README.html`](docs/README.html)**
+> in your browser for the full documentation as a styled site — a sidebar links this
+> overview, the architecture & design docs, the verification guide, and the assumptions,
+> with a rendered architecture diagram and light/dark support. (Download it and open
+> locally, or browse the `docs/` folder.)
+
 **AI-assisted alcohol-label verification for TTB compliance agents.**
 
 An agent uploads a label image plus the application data it should match. LabelCheck reads

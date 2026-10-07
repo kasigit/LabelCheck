@@ -146,6 +146,8 @@ def _rewrite_links(html: str, is_readme: bool) -> str:
         html = html.replace(f'href="{md_name}', f'href="{out}')
     html = html.replace('href="../README.md', 'href="README.html')
     html = html.replace('href="docs/index.html"', 'href="README.html"')
+    # The README points at docs/README.html; from inside docs/ that's just README.html.
+    html = html.replace('href="docs/README.html', 'href="README.html')
 
     if is_readme:
         # Prefix ../ to any remaining relative link (root-relative in the source).
