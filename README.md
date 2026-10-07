@@ -1,11 +1,5 @@
 # LabelCheck
 
-> 📖 **Prefer a nicely formatted version?** Open **[`docs/README.html`](docs/README.html)**
-> in your browser for the full documentation as a styled site — a sidebar links this
-> overview, the architecture & design docs, the verification guide, and the assumptions,
-> with a rendered architecture diagram and light/dark support. (Download it and open
-> locally, or browse the `docs/` folder.)
-
 **AI-assisted alcohol-label verification for TTB compliance agents.**
 
 An agent uploads a label image plus the application data it should match. LabelCheck reads
@@ -20,14 +14,9 @@ The tool **flags**; the agent makes the final call. Uncertain results are marked
 > and makes **no outbound network calls at runtime** — it runs entirely behind a firewall.
 
 See [docs/DOCUMENTATION.md](docs/DOCUMENTATION.md) for the full write-up (what it does, the
-architecture diagram, the tech-stack rationale, constraints) and
+architecture diagram, the tech-stack rationale, constraints),
+[docs/HOW_TO_VERIFY.md](docs/HOW_TO_VERIFY.md) for a step-by-step test guide, and
 [docs/assumptions.md](docs/assumptions.md) for the assumptions made.
-
-**Prefer reading in a browser?** Open **[docs/README.html](docs/README.html)** — a styled,
-self-contained HTML version of the docs with a sidebar linking this overview, the full
-documentation, the verification guide, and the assumptions (rendered architecture diagram,
-light/dark support). Regenerate it after editing any `.md` with
-`python scripts/build_docs_html.py`.
 
 ---
 

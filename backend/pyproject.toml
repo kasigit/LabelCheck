@@ -38,7 +38,6 @@ dev = [
     "httpx>=0.27",   # FastAPI TestClient
     "ruff>=0.5",
     "pillow>=10.3",  # used only by the sample-image generator script
-    "markdown>=3.6",  # used only by scripts/build_docs_html.py
 ]
 
 [tool.ruff]
